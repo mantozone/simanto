@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>zone</title>
+
+    <!-- zone icon-->
+    <link rel="icon" type="image/png" href="https://i.ibb.co.com/zTw0HGqw/zone-1.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co.com/zTw0HGqw/zone-1.png">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        #main-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(240, 240, 240, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #main-header.header-hidden {
+            transform: translateY(-60px);
+        }
+        
+        #main-header.header-visible {
+            transform: translateY(0);
+        }
+
+        .search-container {
+            padding: 5px 15px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 14px 50px 14px 25px;
+            font-size: 18px;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+            background-color: #ffffff;
+            color: #333;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            -webkit-appearance: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 25px;
+            left: auto;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+        }
+
+        #search-input:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 4px 14px rgba(0, 122, 255, 0.25);
+        }
+
+        .category-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 5px 15px 10px 15px; 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .category-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-btn {
+            padding: 8px 18px;
+            margin-right: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: none;
+            border-radius: 12px;
+            background-color: #ffffff;
+            color: #343a40;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.25s ease-in-out;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-shadow: 0 0 2px rgba(255,255,255,0.1);
+        }
+
+        .category-btn:hover:not(.active) {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background-color: #343a40;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        #wallpaper-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px;
+            padding: 0 15px 15px 15px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wallpaper-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+        }
+
+        .wallpaper-item.animate-entry {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .wallpaper-image-wrapper {
+            cursor: pointer;
+            width: 100%;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .wallpaper-image-wrapper:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .wallpaper-image-wrapper:active {
+            transform: scale(0.98);
+        }
+
+        .wallpaper-item img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+        
+        .wallpaper-item .title {
+            font-size: 16px;
+            font-weight: 400;
+            text-align: center;
+            margin: 8px 0 0 0;
+            line-height: 1.3;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: default;
+        }
+
+        .download-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .download-btn:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .download-btn:hover:not(:disabled) {
+            background-color: #cccccc;
+        }
+        .download-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #333;
+        }
+
+        /* --- Modal Styles --- */
+        .modal {
+            display: flex;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-view-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 15px 0;
+            box-sizing: border-box;
+        }
+
+        .modal-image-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .modal-content {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 12px;
+            object-fit: contain;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1002;
+        }
+        .close-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        #modal-download-btn {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        #modal-download-btn svg {
+            width: 20px; height: 20px;
+        }
+
+        #thumbnail-container {
+            flex-shrink: 0;
+            height: 100px;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        #thumbnail-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .thumbnail-img {
+            height: 80px;
+            width: auto;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail-img:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .thumbnail-img.active {
+            opacity: 1;
+            border-color: #007aff;
+            transform: scale(1.05);
+        }
+
+        .skeleton {
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                left: 150%;
+            }
+        }
+
+        .wallpaper-item-skeleton {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .wallpaper-item-skeleton .image-placeholder {
+            width: 100%;
+            height: 260px;
+        }
+
+        .wallpaper-item-skeleton .text-placeholder {
+            width: 80%;
+            height: 20px;
+            margin: 0 auto;
+        }
+
+        #back-to-top-btn {
+            display: none;
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 100;
+            border: none;
+            outline: none;
+            background-color: #343a40;
+            color: white;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            width: 50px;
+            height: 50px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(100px);
+        }
+
+        #back-to-top-btn.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    
+    <header id="main-header">
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="search" id="search-input" placeholder="Search Wallpapers">
+                <span class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path fill="#8e8e93" d="M 21 3 C 11.601563 3 4 10.601563 4 20 C 4 29.398438 11.601563 37 21 37  24.355469 37 27.460938 36.015625 30.09375 34.34375 L 42.375 46.625 L 46.625 42.375 L 34.5 30.28125 C 36.679688 27.421875 38 23.878906 38 20 C 38 10.601563 30.398438 3 21 3 Z M 21 7 C 28.199219 7 34 12.800781 34 20 C 34 27.199219 28.199219 33 21 33 C 13.800781 33 8 27.199219 8 20 C 8 12.800781 13.800781 7 21 7 Z"/></svg>
+                </span>
+            </div>
+        </div>
+        <div class="category-container"></div>
+    </header>
+
+    <main id="wallpaper-container"></main>
+
+    <div id="preview-modal" class="modal">
+        <div class="modal-view-container">
+            <div class="modal-image-container">
+                <span class="close-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="currentColor" d="M24.879 2.879A3 3 0 1 1 29.12 7.12l-8.79 8.79a.125.125 0 0 0 0 .177l8.79 8.79a3 3 0 1 1-4.242 4.243l-8.79-8.79a.125.125 0 0 0-.177 0l-8.79 8.79a3 3 0 1 1-4.243-4.242l8.79-8.79a.125.125 0 0 0 0-.177l-8.79-8.79A3 3 0 0 1 7.12 2.878l8.79 8.79a.125.125 0 0 0 .177 0l8.79-8.79Z"/></svg>
+                </span>
+                <img class="modal-content" id="modal-image">
+                <button id="modal-download-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1792" height="1792" viewBox="0 0 1792 1792"><path fill="#333" d="M1344 1344q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28H160q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h465l135 136q58 56 136 56t136-56l136-136h464q40 0 68 28t28 68zm-325-569q17 41-14 70l-448 448q-18 19-45 19t-45-19L403 621q-31-29-14-70 17-39 59-39h256V64q0-26 19-45t45-19h256q26 0 45 19t19 45v448h256q42 0 59 39z"></path></svg>
+                    Download
+                </button>
+            </div>
+            <div id="thumbnail-container"></div>
+        </div>
+    </div>
+    
+    <button id="back-to-top-btn" title="Go to top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6l-6 6z"/></svg>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.getElementById('main-header');
+            const searchInput = document.getElementById('search-input');
+            const categoryContainer = document.querySelector('.category-container');
+            const container = document.getElementById('wallpaper-container');
+            const modal = document.getElementById('preview-modal');
+            const modalImage = document.getElementById('modal-image');
+            const closeBtn = document.querySelector('.close-btn');
+            const thumbnailContainer = document.getElementById('thumbnail-container');
+            const modalDownloadBtn = document.getElementById('modal-download-btn');
+            const backToTopBtn = document.getElementById('back-to-top-btn');
+            
+            const categories = [
+                { name: 'All', url: null },
+                { name: 'Popular', url: 'https://raw.githubusercontent.com/flixanime/data-p/f8f85a3013ea24e4e622f8ae1732e41ffb8b181a/data.json' },
+                { name: 'Anime', url: 'https://raw.githubusercontent.com/ultrafini/data/d3bedcd501382fe4db6' }, 
+                { name: 'Dark', url: 'https://raw.githubusercontent.com/ultrafini/data/7e7d97d2d962e7d715f0a26f8261ca2c9b0c7d6c/Dark.json' }, 
+                { name: 'Gaming', url: '' }, 
+                { name: 'Emoji', url: 'https://raw.githubusercontent.com/ultrafini/data/60c620408960d8ea9b1693def74963bbb3a6a15c/Dark.json' }, 
+                { name: 'Love', url: '' }, 
+                { name: 'Motivational', url: 'Fantasy' }, 
+                { name: 'Art', url: '' }, 
+                { name: 'Space', url: '' }, 
+                { name: 'Carutoon', url: '' },              
+                { name: 'Beautiful', url: '' },
+                { name: 'Natural', url: ' https://raw.githubusercontent.com/ultrafini/data/2c01255a0897b916ec627d75726d174c1efcba71/Natural.json  ' }, 
+                { name: 'Amazing', url: 'https://raw.githubusercontent.com/ultrafini/data/2c01255a0897b916ec627d75726d174c1efcba71/Natural.json' }, 
+                { name: 'Dangerous', url: '' },
+                { name: 'Profile', url: '' },
+                { name: 'BTS', url: 'https://raw.githubusercontent.com/ultrafini/data/d3bedcd501382fe4db65994bd8a9c44c3279f869/Anime.json' },
+            ];
+            
+            let categoryDataCache = {};
+            let currentWallpapers = []; 
+            let lastScrollTop = 0;
+
+            let renderedWallpapersCount = 0;
+            const wallpapersPerLoad = 10;
+            let isLoadingMore = false;
+
+            // --- Utility Functions ---
+            
+            /**
+             * Shuffles array in place.
+             * @param {Array} array items An array containing the items.
+             */
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+
+            // --- Event Listeners ---
+            
+            window.addEventListener('scroll', () => {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop && scrollTop > 70) {
+                    header.classList.add('header-hidden');
+                    header.classList.remove('header-visible');
+                } else if (scrollTop < lastScrollTop) {
+                    header.classList.add('header-visible');
+                    header.classList.remove('header-hidden');
+                }
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+
+                if (searchInput.value.length === 0 && (window.innerHeight + window.scrollY) >= document.documentElement.offsetHeight - 500) {
+                    loadMoreWallpapers();
+                }
+            }, { passive: true });
+            
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                if(searchTerm.length > 0) {
+                    const filtered = currentWallpapers.filter(w => w.title.toLowerCase().includes(searchTerm));
+                    renderAllWallpapers(filtered);
+                } else {
+                    const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+                    loadCategory(activeCategory);
+                }
+            });
+
+            categoryContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    loadCategory(e.target.dataset.category);
+                }
+            });
+
+            // --- Core Functions ---
+
+            function initialize() {
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'category-btn';
+                    btn.textContent = cat.name;
+                    btn.dataset.category = cat.name;
+                    if (cat.name === 'All') btn.classList.add('active');
+                    categoryContainer.appendChild(btn);
+                });
+                loadCategory('All');
+            }
+            
+            async function loadCategory(categoryName) {
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    const isActive = btn.dataset.category === categoryName;
+                    btn.classList.toggle('active', isActive);
+                    if (isActive) {
+                        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
+                });
+                searchInput.value = '';
+                container.innerHTML = ''; 
+                renderedWallpapersCount = 0; 
+
+                try {
+                    if (categoryDataCache[categoryName]) {
+                        currentWallpapers = categoryDataCache[categoryName];
+                    } else {
+                        showSkeletonLoader();
+                        if (categoryName === 'All') {
+                            const allWallpapers = [];
+                            const seenLinks = new Set();
+                            const categoriesToFetch = categories.filter(c => c.name !== 'All' && c.url && c.url.trim() !== '');
+                            const promises = categoriesToFetch.map(async (cat) => {
+                                try {
+                                    const response = await fetch(cat.url.trim());
+                                    return response.ok ? response.json() : [];
+                                } catch (error) { return []; }
+                            });
+                            const results = await Promise.all(promises);
+                            results.forEach(data => data.forEach(wallpaper => {
+                                if (wallpaper && wallpaper.link && !seenLinks.has(wallpaper.link)) {
+                                    allWallpapers.push(wallpaper);
+                                    seenLinks.add(wallpaper.link);
+                                }
+                            }));
+                            
+                            // *** NEW: Shuffle the wallpapers for 'All' category ***
+                            shuffleArray(allWallpapers);
+                            currentWallpapers = allWallpapers;
+
+                        } else {
+                            const category = categories.find(c => c.name === categoryName);
+                            if (!category || !category.url || category.url.trim() === '') throw new Error(`No URL`);
+                            const response = await fetch(category.url.trim());
+                            if (!response.ok) throw new Error(`Network error`);
+                            currentWallpapers = await response.json();
+                        }
+                        categoryDataCache[categoryName] = currentWallpapers;
+                    }
+                    
+                    container.innerHTML = ''; 
+                    if (currentWallpapers.length > 0) {
+                        loadMoreWallpapers(true);
+                    } else {
+                         container.innerHTML = `<p style="text-align: center; grid-column: 1 / -1;">No wallpapers found for '${categoryName}'.</p>`;
+                    }
+                } catch (error) {
+                    container.innerHTML = `<p style="text-align: center; grid-column: 1 / -1;">Wallpapers for '${categoryName}' are not available yet.</p>`;
+                    currentWallpapers = [];
+                }
+            }
+            
+            function loadMoreWallpapers(isInitialLoad = false) {
+                if (isLoadingMore || renderedWallpapersCount >= currentWallpapers.length) {
+                    return;
+                }
+                isLoadingMore = true;
+
+                const batch = currentWallpapers.slice(renderedWallpapersCount, renderedWallpapersCount + wallpapersPerLoad);
+                
+                if (batch.length > 0) {
+                    renderWallpaperBatch(batch, isInitialLoad);
+                }
+                
+                isLoadingMore = false;
+            }
+
+            function renderWallpaperBatch(wallpapers, shouldAnimate) {
+                const fragment = document.createDocumentFragment();
+                wallpapers.forEach((wallpaper, index) => {
+                    const globalIndex = renderedWallpapersCount + index;
+                    const wallpaperItem = createWallpaperElement(wallpaper, globalIndex, shouldAnimate);
+                    fragment.appendChild(wallpaperItem);
+                });
+                container.appendChild(fragment);
+                renderedWallpapersCount += wallpapers.length;
+            }
+
+            function renderAllWallpapers(wallpapers) {
+                container.innerHTML = '';
+                if (!wallpapers || wallpapers.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No results found.</p>';
+                    return;
+                }
+                const fragment = document.createDocumentFragment();
+                wallpapers.forEach((wallpaper, index) => {
+                    const wallpaperItem = createWallpaperElement(wallpaper, index, false);
+                    fragment.appendChild(wallpaperItem);
+                });
+                container.appendChild(fragment);
+            }
+
+            function createWallpaperElement(wallpaper, index, shouldAnimate) {
+                const wallpaperItem = document.createElement('div');
+                wallpaperItem.className = 'wallpaper-item';
+                if (shouldAnimate) {
+                    wallpaperItem.classList.add('animate-entry');
+                    wallpaperItem.style.animationDelay = `${(index % wallpapersPerLoad) * 0.05}s`;
+                } else {
+                    wallpaperItem.style.opacity = 1;
+                }
+                
+                const imageWrapper = document.createElement('div');
+                imageWrapper.className = 'wallpaper-image-wrapper';
+                
+                // Find the original index in currentWallpapers to pass to openModal
+                const originalIndex = currentWallpapers.findIndex(w => w.link === wallpaper.link);
+                imageWrapper.onclick = () => openModal(originalIndex); 
+                
+                const img = document.createElement('img');
+                img.src = wallpaper.link;
+                img.alt = wallpaper.title;
+                img.loading = 'lazy';
+                imageWrapper.appendChild(img);
+                
+                const title = document.createElement('h3');
+                title.className = 'title';
+                title.textContent = wallpaper.title;
+                
+                const downloadButton = document.createElement('button');
+                downloadButton.className = 'download-btn';
+                downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="1792" height="1792" viewBox="0 0 1792 1792"><path d="M1344 1344q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28H160q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h465l135 136q58 56 136 56t136-56l136-136h464q40 0 68 28t28 68zm-325-569q17 41-14 70l-448 448q-18 19-45 19t-45-19L403 621q-31-29-14-70 17-39 59-39h256V64q0-26 19-45t45-19h256q26 0 45 19t19 45v448h256q42 0 59 39z"></path></svg>`;
+                downloadButton.onclick = (event) => {
+                    event.stopPropagation();
+                    downloadImage(wallpaper.link, `${wallpaper.title}.jpg`, downloadButton);
+                };
+                
+                wallpaperItem.appendChild(imageWrapper);
+                wallpaperItem.appendChild(title);
+                wallpaperItem.appendChild(downloadButton);
+                return wallpaperItem;
+            }
+            
+            function showSkeletonLoader() {
+                container.innerHTML = '';
+                for (let i = 0; i < 6; i++) {
+                    const skeletonItem = document.createElement('div');
+                    skeletonItem.className = 'wallpaper-item-skeleton';
+                    skeletonItem.innerHTML = `
+                        <div class="skeleton image-placeholder"></div>
+                        <div class="skeleton text-placeholder"></div>
+                        <div class="skeleton text-placeholder" style="width: 100%; height: 30px;"></div>
+                    `;
+                    container.appendChild(skeletonItem);
+                }
+            }
+
+            // --- Modal and Download Functions ---
+
+            function openModal(startIndex) {
+                // Always use the full `currentWallpapers` list for the modal
+                // This ensures consistency whether user is searching or not
+                thumbnailContainer.innerHTML = '';
+                currentWallpapers.forEach((wallpaper, index) => {
+                    const thumbImg = document.createElement('img');
+                    thumbImg.src = wallpaper.link;
+                    thumbImg.className = 'thumbnail-img';
+                    thumbImg.dataset.index = index;
+                    thumbImg.loading = 'lazy';
+                    thumbImg.onclick = () => showWallpaperInModal(index);
+                    thumbnailContainer.appendChild(thumbImg);
+                });
+                showWallpaperInModal(startIndex);
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function showWallpaperInModal(index) {
+                const wallpaper = currentWallpapers[index];
+                if (!wallpaper) return;
+                modalImage.src = wallpaper.link;
+                modalDownloadBtn.onclick = () => {
+                    const originalText = modalDownloadBtn.innerHTML;
+                    modalDownloadBtn.textContent = 'Downloading...';
+                    modalDownloadBtn.disabled = true;
+                    downloadImage(wallpaper.link, `${wallpaper.title}.jpg`, modalDownloadBtn, originalText);
+                };
+                document.querySelectorAll('.thumbnail-img').forEach(img => {
+                    img.classList.toggle('active', parseInt(img.dataset.index) === index);
+                });
+                const activeThumbnail = document.querySelector(`.thumbnail-img[data-index='${index}']`);
+                if (activeThumbnail) {
+                    activeThumbnail.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            }
+            
+            function closeModal() {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            closeBtn.onclick = closeModal;
+            modal.onclick = (event) => {
+                if (event.target === modal) closeModal();
+            };
+
+            function downloadImage(url, filename, button, originalContent = null) {
+                const isModalButton = button.id === 'modal-download-btn';
+                if (!isModalButton) originalContent = button.innerHTML;
+                button.innerHTML = 'Downloading...';
+                button.disabled = true;
+                fetch(url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none'; a.href = blobUrl; a.download = filename;
+                        document.body.appendChild(a); a.click();
+                        window.URL.revokeObjectURL(blobUrl); a.remove();
+                    })
+                    .catch(() => alert('Download failed'))
+                    .finally(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalContent;
+                    });
+            }
+
+            // Start the application
+            initialize();
+        });
+    </script>
+</body>
+</html>
